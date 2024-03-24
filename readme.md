@@ -16,35 +16,35 @@
 
 **Displaying contents of a json file:**
 
-        ```cargo run -- -file <file path>```
+        cargo run -- -file <file path>
     
 **Displaying contents of a json file, but pretty:**
 
-        ```cargo run -- -file <file path> -pretty```
+        cargo run -- -file <file path> -pretty
     
 **Passing in json object directly written on command line:**
 
-        ```cargo run -- -raw <json data>```
-    
+        cargo run -- -raw <json data>    
+        
 **You can also use -pretty with this one:**
 
-        ```cargo run -- -raw <json data> -pretty```
+        cargo run -- -raw <json data> -pretty
     
 **For now, for only one level of depth, extract the value of certain key:**
 
-        ```cargo run -- -file <file path> -extract <key name>```
+        cargo run -- -file <file path> -extract <key name>
         
           **Or**
         
-        ```cargo run -- -raw <json data> -extract <key name>```
+        cargo run -- -raw <json data> -extract <key name>
     
 **Or you can extract a dictionary of two keys given:**
 
-        ```cargo run -- -file <file path> -extract <key name 1>,<key name 2>``` 
+        cargo run -- -file <file path> -extract <key name 1>,<key name 2> 
         
           **Or**
         
-        ```cargo run -- -raw <json data> -extract <key name 1>,<key name 2>```
+        cargo run -- -raw <json data> -extract <key name 1>,<key name 2>
 
 
 ---        
