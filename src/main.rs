@@ -20,19 +20,15 @@ fn main() {
         _ => panic!("Undefined argument"),
     };
 
-    if args.len() < 4 {
-        println!("{:?}", read_json);
-        std::process::exit(0);
-    }
-
     match env::args().nth(3) {
         None => {
-            println!("{}", read_json);
+            println!("{}", read_json.to_string());
             std::process::exit(0);
         }
         Some(arg3) => match arg3.as_str() {
             "-pretty" => {
-                println!("{}", try_pretty(&read_json))
+                println!("{}", try_pretty(&read_json));
+                std::process::exit(0);
             }
             "-extract" => {
                 let extraction_argument =
@@ -42,6 +38,7 @@ fn main() {
                     None => query(&read_json, &extraction_argument),
                 };
                 println!("{}", try_pretty(&json_value));
+                std::process::exit(0);
             }
             _ => {
                 println!("Unknown argument {}", args[3]);
