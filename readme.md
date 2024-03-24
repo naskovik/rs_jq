@@ -34,7 +34,7 @@
 
         cargo run -- -file <file path> -extract <key name>
         
-          **Or**
+**Or**
         
         cargo run -- -raw <json data> -extract <key name>
     
@@ -42,7 +42,7 @@
 
         cargo run -- -file <file path> -extract <key name 1>,<key name 2> 
         
-          **Or**
+**Or**
         
         cargo run -- -raw <json data> -extract <key name 1>,<key name 2>
 
