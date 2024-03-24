@@ -1,6 +1,7 @@
 mod extractor;
 
 mod prelude {
+    pub use crate::extractor::*;
     pub use serde_json::json;
     pub use std::{env, fs};
 }
@@ -19,20 +20,33 @@ fn main() {
         _ => panic!("Undefined argument"),
     };
 
-    match args[3].as_str() {
-        "-pretty" => {
-            println!("{}", try_pretty(&read_json))
+    if args.len() < 4 {
+        println!("{:?}", read_json);
+        std::process::exit(0);
+    }
+
+    match env::args().nth(3) {
+        None => {
+            println!("{}", read_json);
+            std::process::exit(0);
         }
-        "-extract" => {
-            let json_value = match parse_pair::<String>(&args[4], ',') {
-                Some((l, r)) => extractor::query_dict(&read_json, (l.as_str(), r.as_str())),
-                None => extractor::query(&read_json, args[5].as_str()),
-            };
-            println!("{}", try_pretty(&json_value));
-        }
-        _ => {
-            println!("Unknown argument {}", args[3]);
-        }
+        Some(arg3) => match arg3.as_str() {
+            "-pretty" => {
+                println!("{}", try_pretty(&read_json))
+            }
+            "-extract" => {
+                let extraction_argument =
+                    env::args().nth(4).expect("-extract argument not provided");
+                let json_value = match parse_pair::<String>(&extraction_argument, ',') {
+                    Some((l, r)) => query_dict(&read_json, (l.as_str(), r.as_str())),
+                    None => query(&read_json, &extraction_argument),
+                };
+                println!("{}", try_pretty(&json_value));
+            }
+            _ => {
+                println!("Unknown argument {}", args[3]);
+            }
+        },
     }
 }
 
