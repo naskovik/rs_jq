@@ -66,6 +66,10 @@ fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
     }
 }
 
+fn parse_concat<T: FromStr>(s: &str, concatenator: char) -> Option<Vec<T>> {
+    todo!();
+}
+
 fn try_pretty(json_val: &serde_json::Value) -> String {
     match serde_json::to_string_pretty(json_val) {
         Ok(pretty_json) => pretty_json,

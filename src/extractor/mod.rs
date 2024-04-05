@@ -1,9 +1,15 @@
 use crate::prelude::*;
 
-pub fn query(json_value: &serde_json::Value, target_key: &str) -> serde_json::Value {
+pub fn query(
+    json_value: &serde_json::Value,
+    target_key: &str
+) -> serde_json::Value {
     if json_value.is_array() {
+
         let mut accumulator: Vec<serde_json::Value> = Vec::new();
+
         match json_value.as_array() {
+
             Some(arr) => {
                 arr.into_iter()
                     .for_each(|elem| accumulator.push(query(elem, target_key)));
@@ -11,23 +17,31 @@ pub fn query(json_value: &serde_json::Value, target_key: &str) -> serde_json::Va
             }
             None => return json!("Expected value to be an array, but was unable to parse it"),
         }
-    } else if json_value.is_object() {
-        assert!(json_value.is_object());
+
+    }
+    else if json_value.is_object() {
 
         if let Some(valid_json) = json_value.get(target_key) {
             valid_json.clone()
-        } else {
+        }
+        else {
             return serde_json::from_str(format!("{} not found", target_key).as_str()).unwrap();
         }
+
     } else {
-        // TODO do something here
         json!("Couldn't determine JSON object")
     }
 }
 
-pub fn query_dict(json_val: &serde_json::Value, keys: (&str, &str)) -> serde_json::Value {
+pub fn query_dict(
+    json_val: &serde_json::Value,
+    keys: (&str, &str)
+) -> serde_json::Value {
+
     if json_val.is_array() {
+
         let mut acc: Vec<serde_json::Value> = Vec::new();
+        
         match json_val.as_array() {
             Some(arr) => {
                 arr.into_iter()
@@ -36,18 +50,43 @@ pub fn query_dict(json_val: &serde_json::Value, keys: (&str, &str)) -> serde_jso
             }
             None => return json!("Expected json value to be an array, but was unable to parse it"),
         }
-    } else if json_val.is_object() {
-        if let (Some(result1), Some(result2)) = (json_val.get(keys.0), json_val.get(keys.1)) {
+    }
+    else if json_val.is_object() {
+
+        if let (Some(result1), Some(result2)) =
+            (json_val.get(keys.0), json_val.get(keys.1)) {
+
             json!(vec![result1, result2])
-        } else {
+        }
+        else {
             serde_json::from_str(
                 format!("Extracting {:?},{:?} wasn't possible", keys.0, keys.1).as_str(),
             )
             .unwrap()
         }
-    } else {
+    }
+    else {
         json!("Couldn't determine JSON object")
     }
+}
+
+pub fn query_nested(
+    json_value: &serde_json::Value,
+    keys: Vec<&str>
+) -> serde_json::Value {
+    assert!(json_value.is_object());
+
+    let mut res: serde_json::Value = serde_json::from_str("init").unwrap();
+
+    for key in keys.iter() {
+        match json_value.get(*key) {
+            Some(val) => res = val.clone(),
+            None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
+        }
+    }
+
+    res
+
 }
 
 #[cfg(test)]
