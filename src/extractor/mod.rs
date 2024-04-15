@@ -76,10 +76,10 @@ pub fn query_nested(
 ) -> serde_json::Value {
     assert!(json_value.is_object());
 
-    let mut res: serde_json::Value = serde_json::from_str("init").unwrap();
+    let mut res: serde_json::Value = json_value.clone();
 
     for key in keys.iter() {
-        match json_value.get(*key) {
+        match res.get(*key) {
             Some(val) => res = val.clone(),
             None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
         }
@@ -92,6 +92,8 @@ pub fn query_nested(
 #[cfg(test)]
 mod test {
     use serde_json::json;
+
+    use crate::query_nested;
 
     use super::query;
     use super::query_dict;
@@ -118,6 +120,18 @@ mod test {
     fn extract_dict_array() {
         let json = json!([{"foo":"cdu","bar":"quino"}]);
         assert_eq!(query_dict(&json, ("foo", "bar")), json!([["cdu", "quino"]]));
+    }
+
+    #[test]
+    fn test_query_nested() {
+        let json = json!({
+            "satoru": {
+                "gojo": {
+                    "god": "si"
+                }
+            }
+        });
+        assert_eq!(query_nested(&json, vec!["satoru", "gojo", "god"]), "si");
     }
 }
 
