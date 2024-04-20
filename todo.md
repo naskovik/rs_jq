@@ -6,6 +6,5 @@
 [X] Extract dictionary from given json.
 [X] Parse possible pairs of arguments for query. Create fn parse_pair which should determine if there is a separator which would indicate two keys,
     for query of dictionary
-[] Extract nested
-[] Optimize: Maybe try to avoid a lot of transformations from string and to string ??
+[X] Extract nested
 

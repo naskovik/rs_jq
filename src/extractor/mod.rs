@@ -74,7 +74,9 @@ pub fn query_nested(
     json_value: &serde_json::Value,
     keys: Vec<&str>
 ) -> serde_json::Value {
-    assert!(json_value.is_object());
+    if !json_value.is_object() {
+        panic!("Inadecuate JSON structure in which to search for keys");
+    }
 
     let mut res: serde_json::Value = json_value.clone();
 

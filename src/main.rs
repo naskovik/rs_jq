@@ -6,8 +6,9 @@ mod prelude {
     pub use std::{env, fs};
 }
 
-use std::str::FromStr;
 
+
+use std::str::FromStr;
 use prelude::*;
 
 fn main() {
@@ -22,23 +23,35 @@ fn main() {
 
     match env::args().nth(3) {
         None => {
-            println!("{}", read_json.to_string());
+            println!("{}", try_pretty(&read_json));
             std::process::exit(0);
         }
         Some(arg3) => match arg3.as_str() {
-            "-pretty" => {
-                println!("{}", try_pretty(&read_json));
+            "-q" => {
+                let extraction_argument = env::args().nth(4)
+                    .expect("-extract argument not provided");
+
+                if let Some((l, r)) = parse_pair::<String>(&extraction_argument, ',') {
+                    let res = query_dict(&read_json, (l.as_str(), r.as_str()));
+                    println!("{}", try_pretty(&res));
+                }
+                else {
+                    let query_args: Vec<&str> = extraction_argument.split_terminator('.')
+                        .filter(|x| !x.is_empty())
+                        .collect::<Vec<&str>>();
+
+                    let result = match query_args.len() {
+                        0 => read_json,
+                        1 => query(&read_json, query_args[0]),
+                        _ => query_nested(&read_json, query_args),
+                        
+                    };
+
+                    println!("{}", try_pretty(&result))
+                }
+
                 std::process::exit(0);
-            }
-            "-extract" => {
-                let extraction_argument =
-                    env::args().nth(4).expect("-extract argument not provided");
-                let json_value = match parse_pair::<String>(&extraction_argument, ',') {
-                    Some((l, r)) => query_dict(&read_json, (l.as_str(), r.as_str())),
-                    None => query(&read_json, &extraction_argument),
-                };
-                println!("{}", try_pretty(&json_value));
-                std::process::exit(0);
+
             }
             _ => {
                 println!("Unknown argument {}", args[3]);
@@ -64,10 +77,6 @@ fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
             _ => None,
         },
     }
-}
-
-fn parse_concat<T: FromStr>(s: &str, concatenator: char) -> Option<Vec<T>> {
-    todo!();
 }
 
 fn try_pretty(json_val: &serde_json::Value) -> String {
