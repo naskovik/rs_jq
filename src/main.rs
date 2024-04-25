@@ -11,13 +11,15 @@ mod prelude {
 use std::str::FromStr;
 use prelude::*;
 
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
     let read_json: serde_json::Value = match args[1].as_str() {
         "-file" => from_file(&args[2]),
 
-        "-raw" => serde_json::from_str(args[2].as_str()).expect("invalid json argument"),
+        "-raw" => serde_json::from_str(args[2].as_str())
+            .expect("invalid json argument"),
         _ => panic!("Undefined argument"),
     };
 
