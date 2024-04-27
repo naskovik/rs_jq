@@ -1,7 +1,9 @@
 mod extractor;
+mod scanner;
 
 mod prelude {
     pub use crate::extractor::*;
+    pub use crate::scanner::*;
     pub use serde_json::json;
     pub use std::{env, fs};
 }
@@ -28,38 +30,66 @@ fn main() {
             println!("{}", try_pretty(&read_json));
             std::process::exit(0);
         }
-        Some(arg3) => match arg3.as_str() {
-            "-q" => {
-                let extraction_argument = env::args().nth(4)
-                    .expect("-extract argument not provided");
-
-                if let Some((l, r)) = parse_pair::<String>(&extraction_argument, ',') {
-                    let res = query_dict(&read_json, (l.as_str(), r.as_str()));
-                    println!("{}", try_pretty(&res));
-                }
-                else {
-                    let query_args: Vec<&str> = extraction_argument.split_terminator('.')
-                        .filter(|x| !x.is_empty())
-                        .collect::<Vec<&str>>();
-
-                    let result = match query_args.len() {
-                        0 => read_json,
-                        1 => query(&read_json, query_args[0]),
-                        _ => query_nested(&read_json, query_args),
-                        
-                    };
-
-                    println!("{}", try_pretty(&result))
-                }
-
-                std::process::exit(0);
-
+        Some(arg3) => {
+            match query_handle(&arg3, &read_json) {
+                Some(result) => println!("{}", result),
+                None => println!("Invalid argument passed in")
             }
-            _ => {
-                println!("Unknown argument {}", args[3]);
+        }
+    }
+
+    std::process::exit(0);
+}
+
+fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Value> {
+
+    let mut scanner = Scanner::new(arg);
+
+    if !scanner.take('.') {
+        return None
+    }
+
+    let result = match scanner.peek() {
+        Some('(') => {
+            if let Some((l, r)) = parse_pair::<String>(arg, ',') {
+                let keys = (l.as_str(), r.as_str());
+                Some(query_dict(&jsonv, keys))
+            }
+            else {
+                None
             }
         },
-    }
+        Some('{') => {
+            // TODO: make this as in jq
+            None
+        },
+        Some('[') => {
+            // TODO: make this as in jq
+            None
+        },
+        Some(_) => {
+
+            let query_keys: Vec<&str> = arg.split_terminator('.')
+                .filter(|x| !x.is_empty())
+                .collect::<Vec<&str>>();
+
+            let result = match query_keys.len() {
+                0 => jsonv.clone(),
+                1 => query(jsonv, query_keys[0]),
+                _ => query_nested(jsonv, query_keys),
+
+            };
+
+            return Some(result.clone());
+
+        },
+
+        None => None
+
+    };
+
+    result
+
 }
 
 fn from_file(name: &String) -> serde_json::Value {

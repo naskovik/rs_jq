@@ -21,12 +21,12 @@
         
 **To query fields from the json**
 
-        cargo run -- -file <file path> -q <key names connected by dots>
+        cargo run -- -file <file path> .<key names connected by dots>
         
 **Or you can extract a dictionary of two keys given:**
 
-        cargo run -- -file <file path> -q <key name 1>,<key name 2> 
-        cargo run -- -raw <json data> -q <key name 1>,<key name 2>
+        cargo run -- -file <file path> .(<key name 1>,<key name 2>) 
+        cargo run -- -raw <json data> .(<key name 1>,<key name 2>)
         
 ---        
 
