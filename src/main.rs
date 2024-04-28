@@ -9,8 +9,6 @@ mod prelude {
 }
 
 
-
-use std::str::FromStr;
 use prelude::*;
 
 
@@ -51,7 +49,7 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
 
     let result = match scanner.peek() {
         Some('(') => {
-            if let Some((l, r)) = parse_pair::<String>(arg, ',') {
+            if let Some((l, r)) = Scanner::parse_pair::<String>(arg, ',') {
                 let keys = (l.as_str(), r.as_str());
                 Some(query_dict(&jsonv, keys))
             }
@@ -61,6 +59,10 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
         },
         Some('{') => {
             // TODO: make this as in jq
+            // field1: key1.key2.keyN, field2: key1.key2.keyN  }  
+            //let mut content = scanner.take_until('}');
+            // field1:key1.key2.keyN,...fieldN: key1.key2.keyN
+            // TODO use a Map
             None
         },
         Some('[') => {
@@ -68,7 +70,6 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
             None
         },
         Some(_) => {
-
             let query_keys: Vec<&str> = arg.split_terminator('.')
                 .filter(|x| !x.is_empty())
                 .collect::<Vec<&str>>();
@@ -99,16 +100,6 @@ fn from_file(name: &String) -> serde_json::Value {
         serde_json::from_str(string_json.as_str()).expect("json was not well formated");
 
     json
-}
-
-fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
-    match s.find(separator) {
-        None => None,
-        Some(index) => match (T::from_str(&s[..index]), T::from_str(&s[index + 1..])) {
-            (Ok(l), Ok(r)) => Some((l, r)),
-            _ => None,
-        },
-    }
 }
 
 fn try_pretty(json_val: &serde_json::Value) -> String {

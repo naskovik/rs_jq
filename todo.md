@@ -7,4 +7,5 @@
 [X] Parse possible pairs of arguments for query. Create fn parse_pair which should determine if there is a separator which would indicate two keys,
     for query of dictionary
 [X] Extract nested
-
+[] Array position argument
+[] Custom object argument
