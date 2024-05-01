@@ -5,9 +5,8 @@ mod prelude {
     pub use crate::extractor::*;
     pub use crate::scanner::*;
     pub use serde_json::json;
-    pub use std::{env, fs};
+    pub use std::{env, fs, collections::HashMap};
 }
-
 
 use prelude::*;
 
@@ -58,11 +57,23 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
             }
         },
         Some('{') => {
-            // TODO: make this as in jq
             // field1: key1.key2.keyN, field2: key1.key2.keyN  }  
-            //let mut content = scanner.take_until('}');
+            let content = scanner.take_until('}')?;
             // field1:key1.key2.keyN,...fieldN: key1.key2.keyN
-            // TODO use a Map
+            let lvl1 = Scanner::split_by(&content, ',')?;
+
+            let mut keys_set: HashMap<String, String> = HashMap::new();
+            lvl1.into_iter().for_each(|elem| {
+                match Scanner::parse_pair::<String>(elem, ':') {
+                    None => {},
+                    Some((custom_key, query_keys)) => {
+                        keys_set.insert(custom_key, query_keys);
+                    }
+                }
+        
+            });
+            
+
             None
         },
         Some('[') => {

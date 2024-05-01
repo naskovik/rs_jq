@@ -1,3 +1,5 @@
+// also general string utilities
+
 use std::str::FromStr;
 
 pub struct Scanner {
@@ -56,7 +58,6 @@ impl Scanner {
         }
     } 
 
-    #[allow(dead_code)]
     pub fn take_until(&mut self, target: char) -> Option<String> {
         let mut result = String::new();
         while !self.is_done() &&
@@ -90,6 +91,86 @@ impl Scanner {
                 }
             }
         }
+    }
+
+    pub fn split_by(s: &str, separator: char) -> Option<Vec<&str>> {
+        // TODO check a couple of things
+        Some(s.split(separator).filter(|el| !el.is_empty()).collect())       
+    }    
+
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::Scanner;
+
+    
+    #[test]
+    fn test_parse_pair() {
+        assert_eq!(
+            Scanner::parse_pair::<String>("cdu,quino", ','),
+            Some(("cdu".to_string(), "quino".to_string()))
+        );
+
+        assert_eq!(
+            Scanner::parse_pair::<String>("cdu:quino", ':'),
+            Some(("cdu".to_string(), "quino".to_string()))
+        );
+
+
+        assert_eq!(
+            Scanner::parse_pair::<String>("cdu:quino", ','),
+            None
+        );
+
+
+        assert_eq!(
+            Scanner::parse_pair::<String>("cdu:quino,nazar", ','),
+            Some(("cdu:quino".to_string(), "nazar".to_string()))
+        );
+
+        assert_eq!(
+            Scanner::parse_pair::<String>("cdu:quino.nazar", ':'),
+            Some(("cdu".to_string(), "quino.nazar".to_string()))
+        );
+
+        
+        assert_eq!(
+            Scanner::parse_pair::<usize>("1:2", ':'),
+            Some((1, 2))
+        );
+
+        
+        assert_eq!(
+            Scanner::parse_pair::<usize>("1:2", ','),
+            None
+        );
+
+         assert_eq!(
+            Scanner::parse_pair::<usize>("1:2", ','),
+            None
+        );
+
+        assert_eq!(
+            Scanner::parse_pair::<usize>("12", ','),
+            None
+        );
+
+    }
+
+    #[test]
+    fn test_take_until() {
+        let mut scanner = Scanner::new("aasdfasd%{&=9823}");
+        assert_eq!(
+            scanner.take_until('%'),
+            Some("aasdfasd".to_string())
+        );
+
+        assert_eq!(scanner.take_until('}'), Some("%{&=9823".to_string()));
+
+        assert_eq!(scanner.peek(), Some('}').as_ref());
+
     }
 
 }
