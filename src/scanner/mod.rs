@@ -94,8 +94,16 @@ impl Scanner {
     }
 
     pub fn split_by(s: &str, separator: char) -> Option<Vec<&str>> {
-        // TODO check a couple of things
-        Some(s.split(separator).filter(|el| !el.is_empty()).collect())       
+        match s.find(separator) {
+            None => None,
+            Some(_) => {
+                let result = s.split(separator)
+                    .filter(|el| !el.is_empty())
+                    .map(|el| el.trim())
+                    .collect();
+                Some(result)
+            }
+        }
     }    
 
 }
@@ -104,6 +112,15 @@ impl Scanner {
 mod tests {
 
     use super::Scanner;
+
+    #[test]
+    fn test_split_by() {
+        let example1 = "object: foo.baz.cdu";
+        assert_eq!(
+            Scanner::split_by(example1, ':'),
+            Some(vec!["object", "foo.baz.cdu"])
+        );
+    }
 
     
     #[test]
