@@ -2,35 +2,52 @@ use crate::prelude::*;
 
 pub fn query(
     json_value: &serde_json::Value,
-    target_key: &str
+    keys: Vec<&str>
 ) -> serde_json::Value {
     if json_value.is_array() {
 
         let mut accumulator: Vec<serde_json::Value> = Vec::new();
 
-        match json_value.as_array() {
+        json_value.as_array()
+            .unwrap_or(&vec![json!("error")]) // expect?
+            .into_iter()
+            .for_each(|elem| {
 
-            Some(arr) => {
-                arr.into_iter()
-                    .for_each(|elem| accumulator.push(query(elem, target_key)));
-                json!(accumulator)
-            }
-            None => return json!("Expected value to be an array, but was unable to parse it"),
-        }
+                let mut res = elem.clone();
+
+                for key in keys.iter() {
+                    match res.get(*key) {
+                        Some(val) => res = val.clone(),
+                        None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
+                    }
+                }
+
+                accumulator.push(res);
+
+            });
+
+        json!(accumulator)
+
 
     }
     else if json_value.is_object() {
 
-        if let Some(valid_json) = json_value.get(target_key) {
-            valid_json.clone()
-        }
-        else {
-            return serde_json::from_str(format!("{} not found", target_key).as_str()).unwrap();
+        let mut res: serde_json::Value = json_value.clone();
+
+        for key in keys.iter() {
+            match res.get(*key) {
+                Some(val) => res = val.clone(),
+                None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
+            }
         }
 
+        res
+
+
     } else {
-        json!("Couldn't determine JSON object")
+        json_value.clone()
     }
+
 }
 
 pub fn query_dict(
@@ -70,32 +87,11 @@ pub fn query_dict(
     }
 }
 
-pub fn query_nested(
-    json_value: &serde_json::Value,
-    keys: Vec<&str>
-) -> serde_json::Value {
-    if !json_value.is_object() {
-        panic!("Inadecuate JSON structure in which to search for keys");
-    }
-
-    let mut res: serde_json::Value = json_value.clone();
-
-    for key in keys.iter() {
-        match res.get(*key) {
-            Some(val) => res = val.clone(),
-            None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
-        }
-    }
-
-    res
-
-}
 
 #[cfg(test)]
 mod test {
     use serde_json::json;
 
-    use crate::query_nested;
 
     use super::query;
     use super::query_dict;
@@ -103,13 +99,13 @@ mod test {
     #[test]
     fn extract_from_object() {
         let json = json!({"foo":"cdu", "bar":"quino"});
-        assert_eq!(query(&json, "foo"), "cdu".to_string());
+        assert_eq!(query(&json, vec!["foo"]), "cdu".to_string());
     }
 
     #[test]
     fn extract_from_array() {
         let json_arr = json!([{"foo":"cdu", "bar":"quino"}]);
-        assert_eq!(query(&json_arr, "foo"), json!(["cdu"]));
+        assert_eq!(query(&json_arr, vec!["foo"]), json!(["cdu"]));
     }
 
     #[test]
@@ -133,7 +129,7 @@ mod test {
                 }
             }
         });
-        assert_eq!(query_nested(&json, vec!["satoru", "gojo", "god"]), "si");
+        assert_eq!(query(&json, vec!["satoru", "gojo", "god"]), "si");
     }
 }
 

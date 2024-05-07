@@ -87,8 +87,7 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
 
             let result = match query_keys.len() {
                 0 => jsonv.clone(),
-                1 => query(jsonv, query_keys[0]),
-                _ => query_nested(jsonv, query_keys),
+                _ => query(jsonv, query_keys),
 
             };
 
