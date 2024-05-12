@@ -2,8 +2,9 @@ use crate::prelude::*;
 
 pub fn query(
     json_value: &serde_json::Value,
-    keys: Vec<&str>
-) -> serde_json::Value {
+    keys: Vec<String>
+) -> serde_json::Value
+{
     if json_value.is_array() {
 
         let mut accumulator: Vec<serde_json::Value> = Vec::new();
@@ -16,7 +17,7 @@ pub fn query(
                 let mut res = elem.clone();
 
                 for key in keys.iter() {
-                    match res.get(*key) {
+                    match res.get(key) {
                         Some(val) => res = val.clone(),
                         None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
                     }
@@ -35,7 +36,7 @@ pub fn query(
         let mut res: serde_json::Value = json_value.clone();
 
         for key in keys.iter() {
-            match res.get(*key) {
+            match res.get(key) {
                 Some(val) => res = val.clone(),
                 None => res = json!(format!("Unable to find value {:?} in JSON object", *key))
             }
@@ -53,7 +54,8 @@ pub fn query(
 pub fn query_dict(
     json_val: &serde_json::Value,
     keys: (&str, &str)
-) -> serde_json::Value {
+) -> serde_json::Value
+{
 
     if json_val.is_array() {
 
@@ -87,11 +89,39 @@ pub fn query_dict(
     }
 }
 
+pub fn query_for_custom(
+    json_val: &serde_json::Value,
+    map: HashMap<String, Vec<String>>
+) -> serde_json::Value
+{
+    let mut result = json!({});
+    for (key, val) in map.iter() {
+        result
+            .as_object_mut()
+            .unwrap()
+            .insert(
+                key.to_string(),
+                query(
+                    json_val,
+                    val.to_vec()
+                      
+                )
+            );
+            
+    }
+
+    result
+}
+
 
 #[cfg(test)]
 mod test {
+    use std::collections::HashMap;
+
     use serde_json::json;
 
+
+    use crate::query_for_custom;
 
     use super::query;
     use super::query_dict;
@@ -99,25 +129,27 @@ mod test {
     #[test]
     fn extract_from_object() {
         let json = json!({"foo":"cdu", "bar":"quino"});
-        assert_eq!(query(&json, vec!["foo"]), "cdu".to_string());
+        assert_eq!(query(&json, vec!["foo".to_string()]), "cdu".to_string());
     }
 
     #[test]
     fn extract_from_array() {
         let json_arr = json!([{"foo":"cdu", "bar":"quino"}]);
-        assert_eq!(query(&json_arr, vec!["foo"]), json!(["cdu"]));
+        assert_eq!(query(&json_arr, vec![format!("foo")]), json!(["cdu"]));
     }
 
     #[test]
     fn extract_dict_object() {
         let json = json!({"foo":"cdu", "bar":"quino"});
-        assert_eq!(query_dict(&json, ("foo", "bar")), json!(["cdu", "quino"]));
+        let args = ("foo", "bar");
+        assert_eq!(query_dict(&json, args), json!(["cdu", "quino"]));
     }
 
     #[test]
     fn extract_dict_array() {
         let json = json!([{"foo":"cdu","bar":"quino"}]);
-        assert_eq!(query_dict(&json, ("foo", "bar")), json!([["cdu", "quino"]]));
+        let args = ("foo", "bar");
+        assert_eq!(query_dict(&json, args), json!([["cdu", "quino"]]));
     }
 
     #[test]
@@ -129,7 +161,26 @@ mod test {
                 }
             }
         });
-        assert_eq!(query(&json, vec!["satoru", "gojo", "god"]), "si");
+        let vec_arg = vec!["satoru".to_string(), "gojo".to_string(), "god".to_string()];
+        assert_eq!(query(&json, vec_arg), "si");
+    }
+
+    #[test]
+    fn test_query_for_custom() {
+        let json = json!({
+            "satoru": {
+                "gojo": {
+                    "god": "si"
+                }
+            }
+        });
+
+        let custom_key = String::from("respuesta_correcta");
+        let vec_arg = vec!["satoru".to_string(), "gojo".to_string(), "god".to_string()];
+        let expected_result = json!({"respuesta_correcta":"si"});
+        let mut keys_set: HashMap<String, Vec<String>> = HashMap::new();
+        keys_set.insert(custom_key, vec_arg);
+        assert_eq!(query_for_custom(&json, keys_set), expected_result);
     }
 }
 
@@ -143,5 +194,9 @@ fn main() {
         obj.serialize(&mut ser).unwrap();
         println!("{}", String::from_utf8(buf).unwrap());
     }")
+}
+
+macro_rules! vec_of_strings {
+    ($($x:expr),*) => (vec![$($x.to_string()),*]);
 }
 */

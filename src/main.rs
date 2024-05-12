@@ -15,7 +15,14 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let read_json: serde_json::Value = match args[1].as_str() {
-        "-file" => from_file(&args[2]),
+        "-file" => {
+            let string_json = fs::read_to_string(&args[2]).expect("File not found");
+
+            let json: serde_json::Value =
+            serde_json::from_str(string_json.as_str()).expect("json was not well formated");
+
+            json
+        },
 
         "-raw" => serde_json::from_str(args[2].as_str())
             .expect("invalid json argument"),
@@ -62,28 +69,28 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
             // field1:key1.key2.keyN,...fieldN: key1.key2.keyN
             let lvl1 = Scanner::split_by(&content, ',')?;
 
-            let mut keys_set: HashMap<String, String> = HashMap::new();
+            let mut keys_set: HashMap<String, Vec<String>> = HashMap::new();
             lvl1.into_iter().for_each(|elem| {
                 match Scanner::parse_pair::<String>(elem, ':') {
                     None => {},
                     Some((custom_key, query_keys)) => {
-                        keys_set.insert(custom_key, query_keys);
+                        let keys_vec = Scanner::split_by_noref(query_keys, '.')
+                            .unwrap_or(vec![]);
+                        keys_set.insert(custom_key, keys_vec);
                     }
                 }
         
             });
             
 
-            None
+            Some(query_for_custom(&jsonv, keys_set))
         },
         Some('[') => {
             // TODO: make this as in jq
             None
         },
         Some(_) => {
-            let query_keys: Vec<&str> = arg.split_terminator('.')
-                .filter(|x| !x.is_empty())
-                .collect::<Vec<&str>>();
+            let query_keys: Vec<String> = Scanner::split_by_noref(arg.to_string(), '.')?;
 
             let result = match query_keys.len() {
                 0 => jsonv.clone(),
@@ -101,15 +108,6 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
 
     result
 
-}
-
-fn from_file(name: &String) -> serde_json::Value {
-    let string_json = fs::read_to_string(name).expect("File not found");
-
-    let json: serde_json::Value =
-        serde_json::from_str(string_json.as_str()).expect("json was not well formated");
-
-    json
 }
 
 fn try_pretty(json_val: &serde_json::Value) -> String {

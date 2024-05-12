@@ -106,6 +106,20 @@ impl Scanner {
         }
     }    
 
+    pub fn split_by_noref(s: String, separator: char) -> Option<Vec<String>> {
+        match s.find(separator) {
+            None => None,
+            Some(_) => {
+                let result = s.split(separator)
+                    .filter(|el| !el.is_empty())
+                    .map(|el| el.trim().to_string())
+                    .collect();
+                Some(result)
+
+            }
+        }
+    }
+
 }
 
 #[cfg(test)]
