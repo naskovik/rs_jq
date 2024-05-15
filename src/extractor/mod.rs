@@ -104,13 +104,31 @@ pub fn query_for_custom(
                 query(
                     json_val,
                     val.to_vec()
-                      
                 )
             );
             
     }
 
     result
+}
+
+pub fn query_from_vec_w_index(
+    json_val: &serde_json::Value,
+    index: usize
+) -> serde_json::Value {
+
+    assert!(json_val.is_array());
+
+    json_val
+        .as_array()
+        .unwrap_or(json!([]).as_array().unwrap())
+        .into_iter()
+        .nth(index)
+        .unwrap_or(&serde_json::Value::default())
+        .clone()
+
+    
+
 }
 
 

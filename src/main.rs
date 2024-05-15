@@ -86,8 +86,13 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
             Some(query_for_custom(&jsonv, keys_set))
         },
         Some('[') => {
-            // TODO: make this as in jq
-            None
+            let content = scanner.take_until(']')?;
+            if let Ok(index) = content.parse::<usize>() {
+                Some(query_from_vec_w_index(&jsonv, index))
+            } else {
+                Some(serde_json::Value::default())
+            }
+            
         },
         Some(_) => {
             let query_keys: Vec<String> = Scanner::split_by_noref(arg.to_string(), '.')?;
