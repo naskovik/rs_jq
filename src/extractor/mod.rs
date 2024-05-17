@@ -140,6 +140,7 @@ mod test {
 
 
     use crate::query_for_custom;
+    use crate::query_from_vec_w_index;
 
     use super::query;
     use super::query_dict;
@@ -199,6 +200,19 @@ mod test {
         let mut keys_set: HashMap<String, Vec<String>> = HashMap::new();
         keys_set.insert(custom_key, vec_arg);
         assert_eq!(query_for_custom(&json, keys_set), expected_result);
+    }
+
+    #[test]
+    fn test_from_vec_w_index() {
+        let json = json!([
+            { "cj":"you say run" },
+            { "nazar":"specialz" },
+            { "quino":"digimon tamers opening castellano" },
+            { "julio":"deera deera" }
+        ]);
+        let expected = json!({"nazar":"specialz"});
+        let result = query_from_vec_w_index(&json, 1);
+        assert_eq!(expected, result);
     }
 }
 
