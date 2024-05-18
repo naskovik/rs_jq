@@ -93,20 +93,7 @@ impl Scanner {
         }
     }
 
-    pub fn split_by(s: &str, separator: char) -> Option<Vec<&str>> {
-        match s.find(separator) {
-            None => None,
-            Some(_) => {
-                let result = s.split(separator)
-                    .filter(|el| !el.is_empty())
-                    .map(|el| el.trim())
-                    .collect();
-                Some(result)
-            }
-        }
-    }    
-
-    pub fn split_by_noref(s: String, separator: char) -> Option<Vec<String>> {
+    pub fn split_by(s: &str, separator: char) -> Option<Vec<String>> {
         match s.find(separator) {
             None => None,
             Some(_) => {
@@ -115,10 +102,9 @@ impl Scanner {
                     .map(|el| el.trim().to_string())
                     .collect();
                 Some(result)
-
             }
         }
-    }
+    }    
 
 }
 
@@ -132,7 +118,7 @@ mod tests {
         let example1 = "object: foo.baz.cdu";
         assert_eq!(
             Scanner::split_by(example1, ':'),
-            Some(vec!["object", "foo.baz.cdu"])
+            Some(vec!["object".to_string(), "foo.baz.cdu".to_string()])
         );
     }
 

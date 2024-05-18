@@ -71,10 +71,10 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
 
             let mut keys_set: HashMap<String, Vec<String>> = HashMap::new();
             lvl1.into_iter().for_each(|elem| {
-                match Scanner::parse_pair::<String>(elem, ':') {
+                match Scanner::parse_pair::<String>(&elem, ':') {
                     None => {},
                     Some((custom_key, query_keys)) => {
-                        let keys_vec = Scanner::split_by_noref(query_keys, '.')
+                        let keys_vec = Scanner::split_by(&query_keys, '.')
                             .unwrap_or(vec![]);
                         keys_set.insert(custom_key, keys_vec);
                     }
@@ -95,7 +95,7 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
             
         },
         Some(_) => {
-            let query_keys: Vec<String> = Scanner::split_by_noref(arg.to_string(), '.')?;
+            let query_keys: Vec<String> = Scanner::split_by(arg, '.')?;
 
             let result = match query_keys.len() {
                 0 => jsonv.clone(),
