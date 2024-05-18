@@ -28,5 +28,14 @@
         cargo run -- -file <file path> .(<key name 1>,<key name 2>) 
         cargo run -- -raw <json data> .(<key name 1>,<key name 2>)
         
+**Ask for a custom json object based on certain keys of the input object**
+        
+        cargo run -- -file <file path> .{ custom_key_1: key.of.input.object, ...cutom_key_n: posisbly.nested.keys.of.input.object.concatenated.by.dots }
+        cargo run -- -raw <json data> .{ custom_key_1: key.of.input.object, ...cutom_key_n: posisbly.nested.keys.of.input.object.concatenated.by.dots }
+
+**Get the object at the certain index of an array of objects**
+
+        cargo run -- -file <file path> .[index]
+        cargo run -- -raw <json data> .[index]
 ---        
 
