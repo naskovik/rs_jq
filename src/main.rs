@@ -103,7 +103,7 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
 
             };
 
-            return Some(result.clone());
+            Some(result.clone())
 
         },
 
