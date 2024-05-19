@@ -36,7 +36,7 @@ fn main() {
         }
         Some(arg3) => {
             match query_handle(&arg3, &read_json) {
-                Some(result) => println!("{}", result),
+                Some(result) => println!("{}", try_pretty(&result)),
                 None => println!("Invalid argument passed in")
             }
         }
@@ -53,7 +53,8 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
         return None
     }
 
-    let result = match scanner.peek() {
+
+    let result = match scanner.pop() {
         Some('(') => {
             if let Some((l, r)) = Scanner::parse_pair::<String>(arg, ',') {
                 let keys = (l.as_str(), r.as_str());
@@ -118,6 +119,6 @@ fn query_handle(arg: &str, jsonv: &serde_json::Value) -> Option<serde_json::Valu
 fn try_pretty(json_val: &serde_json::Value) -> String {
     match serde_json::to_string_pretty(json_val) {
         Ok(pretty_json) => pretty_json,
-        Err(e) => format!("Failed at parsing json result: {:?}", e),
+        Err(e) => format!("Failed at try_pretty: {:?} \n Showing not prettified: {}", e, json_val),
     }
 }

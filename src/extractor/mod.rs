@@ -94,6 +94,9 @@ pub fn query_for_custom(
     map: HashMap<String, Vec<String>>
 ) -> serde_json::Value
 {
+    assert!(json_val.is_object());
+    // TODO: make available for arrays also
+
     let mut result = json!({});
     for (key, val) in map.iter() {
         result
@@ -206,11 +209,11 @@ mod test {
     fn test_from_vec_w_index() {
         let json = json!([
             { "cj":"you say run" },
-            { "nazar":"specialz" },
+            { "nazar":"specialz", "one":"true" },
             { "quino":"digimon tamers opening castellano" },
             { "julio":"deera deera" }
         ]);
-        let expected = json!({"nazar":"specialz"});
+        let expected = json!({"nazar":"specialz", "one":"true"});
         let result = query_from_vec_w_index(&json, 1);
         assert_eq!(expected, result);
     }
