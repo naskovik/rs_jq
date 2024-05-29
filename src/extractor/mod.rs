@@ -60,7 +60,7 @@ pub fn query_dict(
     if json_val.is_array() {
 
         let mut acc: Vec<serde_json::Value> = Vec::new();
-        
+
         match json_val.as_array() {
             Some(arr) => {
                 arr.into_iter()
@@ -109,7 +109,7 @@ pub fn query_for_custom(
                     val.to_vec()
                 )
             );
-            
+
     }
 
     result
@@ -129,8 +129,6 @@ pub fn query_from_vec_w_index(
         .nth(index)
         .unwrap_or(&serde_json::Value::default())
         .clone()
-
-    
 
 }
 
